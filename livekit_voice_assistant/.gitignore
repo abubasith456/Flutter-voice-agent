@@ -18,10 +18,8 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VSCode
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -33,13 +31,45 @@ migrate_working_dir/
 .pub/
 /build/
 
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android specific
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+**/android/**/outputs/
+**/android/**/intermediates/
+**/android/**/generated/
+
+# iOS/macOS specific
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/App.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/ServiceDefinitions.json
+**/ios/Pods/
+**/ios/Runner.xcworkspace/
+**/ios/Podfile.lock
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/macos/Runner.xcworkspace/
+**/macos/Podfile.lock
+**/macos/Runner/GeneratedPluginRegistrant.*
+
+# Web
+**/web/.dart_tool/
+
+# Build outputs
+**/build/
+**/.dart_tool/
+
+# Env files
+.env
+.env.*
