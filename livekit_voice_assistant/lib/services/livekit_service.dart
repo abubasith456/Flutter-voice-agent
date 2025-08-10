@@ -26,6 +26,7 @@ class LiveKitService {
       'exp': (exp.millisecondsSinceEpoch / 1000).floor(),
       'video': {
         'roomCreate': true,
+        'roomJoin': true,
         'room': roomName,
         'canPublish': true,
         'canSubscribe': true,
