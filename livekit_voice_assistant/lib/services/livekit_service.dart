@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
@@ -24,6 +25,11 @@ class LiveKitService {
       'name': userName,
       'nbf': (now.millisecondsSinceEpoch / 1000).floor(),
       'exp': (exp.millisecondsSinceEpoch / 1000).floor(),
+      // Include participant metadata on join (JSON string)
+      'metadata': jsonEncode({
+        'userId': userId,
+        'userName': userName,
+      }),
       'video': {
         'roomCreate': true,
         'roomJoin': true,
