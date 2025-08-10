@@ -1,0 +1,9 @@
+# Root ignores
+flutter.tar.xz
+/flutter/
+
+# Core dumps
+/livekit_voice_assistant/core.*
+
+# Build outputs (in case)
+/livekit_voice_assistant/build/
