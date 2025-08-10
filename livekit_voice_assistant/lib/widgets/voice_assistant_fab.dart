@@ -137,11 +137,14 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
       }
       final pub = await participant.publishAudioTrack(audioTrack);
 
-      // Ensure the track is enabled/unmuted
+      // Ensure the track is enabled/unmuted and microphone is active on participant
       await pub.track?.enable();
       if (pub.muted) {
         await pub.unmute();
       }
+      try {
+        await participant.setMicrophoneEnabled(true);
+      } catch (_) {}
 
       try {
         participant.setAttributes({
