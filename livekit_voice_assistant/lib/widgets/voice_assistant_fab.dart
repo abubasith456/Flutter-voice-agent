@@ -39,7 +39,6 @@ class VoiceAssistantFAB extends StatefulWidget {
 class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
     with SingleTickerProviderStateMixin {
   lk.Room? _room;
-  lk.LocalTrackPublication? _micPub;
   bool _active = false;
   bool _connecting = false;
   Timer? _levelTimer;
@@ -124,27 +123,13 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
 
       await room.connect(url, token);
 
-      final audioTrack = await lk.LocalAudioTrack.create(
-        lk.AudioCaptureOptions(
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        ),
-      );
       final participant = room.localParticipant;
       if (participant == null) {
         throw Exception('Local participant not available');
       }
-      final pub = await participant.publishAudioTrack(audioTrack);
 
-      // Ensure the track is enabled/unmuted and microphone is active on participant
-      await pub.track?.enable();
-      if (pub.muted) {
-        await pub.unmute();
-      }
-      try {
-        await participant.setMicrophoneEnabled(true);
-      } catch (_) {}
+      // Enable microphone via LiveKit API to create/publish the local track
+      await participant.setMicrophoneEnabled(true);
 
       try {
         participant.setAttributes({
@@ -154,7 +139,6 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
       } catch (_) {}
 
       _room = room;
-      _micPub = pub;
       _startLevelUpdates();
       setState(() {
         _active = true;
@@ -185,12 +169,11 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
   Future<void> _disconnect() async {
     _levelTimer?.cancel();
     try {
-      await _micPub?.track?.stop();
+      await _room?.localParticipant?.setMicrophoneEnabled(false);
       await _room?.disconnect();
       await _room?.dispose();
     } catch (_) {}
     _room = null;
-    _micPub = null;
     if (mounted) {
       setState(() {
         _active = false;
