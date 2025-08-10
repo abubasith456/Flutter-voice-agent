@@ -9,7 +9,10 @@ class VolumeEqualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     final bars = 16;
     final width = MediaQuery.of(context).size.width * 0.8;
-    final barWidth = (width - (bars - 1) * 6) / bars;
+    // Each bar is wrapped with horizontal padding of 3 on both sides => 6 per bar
+    final totalHorizontalPadding = bars * 6;
+    final computed = (width - totalHorizontalPadding) / bars;
+    final barWidth = computed.clamp(2.0, 24.0);
 
     return SizedBox(
       width: width,
