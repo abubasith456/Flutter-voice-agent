@@ -67,16 +67,19 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
   }
 
   Future<void> _ensureMicrophonePermission() async {
-    if (kIsWeb) return; // Handled by browser prompt
-    final status = await Permission.microphone.status;
+    if (kIsWeb) return; // Browser handles prompt
+    var status = await Permission.microphone.status;
     if (status.isGranted) return;
-    if (status.isPermanentlyDenied) {
-      // Surface helpful action to open settings
-      throw Exception('Microphone permission permanently denied. Please enable it in Settings.');
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      await openAppSettings();
+      throw Exception('Microphone permission $status. Please enable it in Settings and try again.');
     }
-    final result = await Permission.microphone.request();
-    if (!result.isGranted) {
-      throw Exception('Microphone permission not granted');
+    status = await Permission.microphone.request();
+    if (!status.isGranted) {
+      if (status.isPermanentlyDenied || status.isRestricted) {
+        await openAppSettings();
+      }
+      throw Exception('Microphone permission $status');
     }
   }
 
