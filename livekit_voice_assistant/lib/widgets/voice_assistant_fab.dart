@@ -91,15 +91,14 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
 
   Future<String> _fetchToken() async {
     final svc = LiveKitService();
-    final envRoom = dotenv.env['LIVEKIT_ROOM_NAME'] ?? 'voice-assistant-room';
-    // Randomized identity/name/room per connect
+    final roomName = dotenv.env['LIVEKIT_ROOM_NAME'] ?? 'voice-assistant-room';
+    // Randomize identity and display name each connect, but keep room fixed
     final tokenIdentity = 'user_${_randomString(6)}';
     final tokenName = 'Guest ${_randomString(4)}';
-    final roomName = 'room_${_randomString(6)}';
     return svc.generateToken(
       tokenIdentity: tokenIdentity,
       tokenName: tokenName,
-      roomName: roomName.isNotEmpty ? roomName : envRoom,
+      roomName: roomName,
       metadataUserId: widget.selectedUser.id,
       metadataUserName: widget.selectedUser.name,
     );
