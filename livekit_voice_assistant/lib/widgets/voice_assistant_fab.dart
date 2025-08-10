@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../models/user.dart';
 import '../state/level_bus.dart';
+import '../services/livekit_service.dart';
 
 enum AssistantPosition { bottomRight, bottomLeft, topLeft, topRight }
 
@@ -71,21 +70,12 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
   }
 
   Future<String> _fetchToken() async {
-    final apiBase = dotenv.env['API_BASE_URL'] ?? 'http://localhost:3000';
-    final uri = Uri.parse('$apiBase/getToken');
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'userId': widget.selectedUser.id,
-        'userName': widget.selectedUser.name,
-      }),
+    final svc = LiveKitService();
+    return svc.generateToken(
+      userId: widget.selectedUser.id,
+      userName: widget.selectedUser.name,
+      roomName: 'voice-assistant-room',
     );
-    if (response.statusCode != 200) {
-      throw Exception('Token error: ${response.statusCode} ${response.body}');
-    }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['token'] as String;
   }
 
   Future<void> _connect() async {
@@ -121,7 +111,6 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
       }
       final pub = await participant.publishAudioTrack(audioTrack);
 
-      // Send metadata for selected user (API may be sync or async based on version)
       try {
         participant.setAttributes({
           'userId': widget.selectedUser.id,
@@ -151,7 +140,6 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
     _levelTimer?.cancel();
     _phase = 0;
     _levelTimer = Timer.periodic(const Duration(milliseconds: 66), (_) async {
-      // Approximate mic activity level for visualization
       _phase += 0.3;
       final level = (0.5 + 0.5 * math.sin(_phase)).clamp(0.0, 1.0);
       setState(() => _currentLevel = level);

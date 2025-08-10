@@ -1,23 +1,39 @@
-import 'dart:convert';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:livekit_client/livekit_client.dart' as lk;
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 class LiveKitService {
-  Future<String> fetchToken({required String userId, required String userName}) async {
-    final apiBase = dotenv.env['API_BASE_URL'] ?? 'http://localhost:3000';
-    final uri = Uri.parse('$apiBase/getToken');
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'userId': userId, 'userName': userName}),
-    );
-    if (response.statusCode != 200) {
-      throw Exception('Token error: ${response.statusCode} ${response.body}');
+  String generateToken({
+    required String userId,
+    required String userName,
+    String roomName = 'voice-assistant-room',
+    Duration ttl = const Duration(hours: 1),
+  }) {
+    final apiKey = dotenv.env['LIVEKIT_API_KEY'];
+    final apiSecret = dotenv.env['LIVEKIT_API_SECRET'];
+    if (apiKey == null || apiSecret == null || apiKey.isEmpty || apiSecret.isEmpty) {
+      throw Exception('LIVEKIT_API_KEY/SECRET not configured');
     }
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return data['token'] as String;
+
+    final now = DateTime.now().toUtc();
+    final exp = now.add(ttl);
+
+    final claims = <String, dynamic>{
+      'iss': apiKey,
+      'sub': userId,
+      'name': userName,
+      'nbf': (now.millisecondsSinceEpoch / 1000).floor(),
+      'exp': (exp.millisecondsSinceEpoch / 1000).floor(),
+      'video': {
+        'roomCreate': true,
+        'room': roomName,
+        'canPublish': true,
+        'canSubscribe': true,
+      },
+    };
+
+    final jwt = JWT(claims);
+    return jwt.sign(SecretKey(apiSecret), algorithm: JWTAlgorithm.HS256);
   }
 
   Future<lk.Room> connectWithMic({
@@ -45,20 +61,13 @@ class LiveKitService {
       ),
     );
 
-    final dynamic participant = room.localParticipant;
-    // publishTrack and setAttributes signatures differ across versions; call defensively
+    final participant = room.localParticipant;
+    if (participant == null) {
+      throw Exception('Local participant not available');
+    }
+    await participant.publishAudioTrack(audioTrack);
     try {
-      final result = participant.publishTrack(audioTrack);
-      if (result is Future) {
-        await result;
-      }
-    } catch (_) {}
-
-    try {
-      final result = participant.setAttributes(attributes);
-      if (result is Future) {
-        await result;
-      }
+      participant.setAttributes(attributes);
     } catch (_) {}
 
     return room;
