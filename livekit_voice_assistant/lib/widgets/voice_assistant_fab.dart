@@ -103,21 +103,10 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
     );
   }
 
-  void _attachRoomListeners(lk.Room room) {
-    // Route audio to speaker on mobile platforms
+  void _enableSpeakerphone() {
     try {
       lk.Hardware.instance.setSpeakerphoneOn(true);
     } catch (_) {}
-
-    final listener = room.createListener();
-    listener.on<lk.RoomEventTrackSubscribed>((event) {
-      final track = event.track;
-      if (track is lk.RemoteAudioTrack) {
-        try {
-          track.setPlaybackEnabled(true);
-        } catch (_) {}
-      }
-    });
   }
 
   Future<void> _connect() async {
@@ -139,7 +128,7 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
       );
 
       await room.connect(url, token);
-      _attachRoomListeners(room);
+      _enableSpeakerphone();
 
       final participant = room.localParticipant;
       if (participant == null) {
