@@ -38,7 +38,8 @@ TalkMode _parseMode(String? s) {
 class MainScreen extends StatefulWidget {
   static const routeName = '/main';
   final AppUser selectedUser;
-  const MainScreen({super.key, required this.selectedUser});
+  final String? roomName;
+  const MainScreen({super.key, required this.selectedUser, this.roomName});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -52,6 +53,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     final lkUrl = dotenv.env['LIVEKIT_URL'] ?? '';
     final position = _parsePosition(dotenv.env['ASSISTANT_POSITION']);
     final mode = _parseMode(dotenv.env['ASSISTANT_MODE']);
+    final roomLabel = widget.roomName ?? (dotenv.env['LIVEKIT_ROOM_NAME'] ?? 'voice-assistant-room');
     return Scaffold(
       body: Stack(
         children: [
@@ -70,7 +72,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                         ),
                   ),
                   Text(
-                    lkUrl.isEmpty ? 'LIVEKIT_URL not set' : lkUrl,
+                    lkUrl.isEmpty ? 'LIVEKIT_URL not set' : '$lkUrl ($roomLabel)',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white70,
                           shadows: const [Shadow(blurRadius: 6, color: Colors.black87)],

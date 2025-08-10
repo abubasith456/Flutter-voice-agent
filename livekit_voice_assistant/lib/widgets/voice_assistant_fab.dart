@@ -65,16 +65,22 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
   }
 
   Future<void> _requestPermissions() async {
-    if (await Permission.microphone.isGranted) return;
-    await Permission.microphone.request();
+    final status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      final result = await Permission.microphone.request();
+      if (!result.isGranted) {
+        throw Exception('Microphone permission not granted');
+      }
+    }
   }
 
   Future<String> _fetchToken() async {
     final svc = LiveKitService();
+    final roomName = dotenv.env['LIVEKIT_ROOM_NAME'] ?? 'voice-assistant-room';
     return svc.generateToken(
       userId: widget.selectedUser.id,
       userName: widget.selectedUser.name,
-      roomName: 'voice-assistant-room',
+      roomName: roomName,
     );
   }
 
@@ -110,6 +116,12 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
         throw Exception('Local participant not available');
       }
       final pub = await participant.publishAudioTrack(audioTrack);
+
+      // Ensure the track is enabled/unmuted
+      await pub.track?.enable();
+      if (pub.muted) {
+        await pub.unmute();
+      }
 
       try {
         participant.setAttributes({
