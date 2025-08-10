@@ -7,3 +7,10 @@ flutter.tar.xz
 
 # Build outputs (in case)
 /livekit_voice_assistant/build/
+
+# Swift Package Manager
+**/.build/
+**/.swiftpm/
+**/DerivedData/
+**/Package.resolved
+**/.package-cache/
