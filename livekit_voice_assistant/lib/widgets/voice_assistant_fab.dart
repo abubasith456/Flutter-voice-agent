@@ -109,6 +109,17 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
     } catch (_) {}
   }
 
+  void _debugRoomState(lk.Room room) {
+    final lp = room.localParticipant;
+    debugPrint('[LK] connected: ${room.connected}');
+    debugPrint('[LK] local publications: ${lp?.audioTrackPublications.length ?? 0}');
+    if (lp != null) {
+      for (final pub in lp.audioTrackPublications) {
+        debugPrint('[LK] pub sid=${pub.sid} muted=${pub.muted} subscribed=${pub.subscribed}');
+      }
+    }
+  }
+
   Future<void> _connect() async {
     if (_active || _connecting) return;
     setState(() => _connecting = true);
@@ -129,6 +140,7 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
 
       await room.connect(url, token);
       _enableSpeakerphone();
+      await room.startAudio();
 
       final participant = room.localParticipant;
       if (participant == null) {
@@ -138,6 +150,18 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
       // Enable microphone via LiveKit API to create/publish the local track
       await participant.setMicrophoneEnabled(true);
 
+      // Fallback: if no audio publications, create and publish manually
+      if (participant.audioTrackPublications.isEmpty) {
+        final track = await lk.LocalAudioTrack.create(
+          lk.AudioCaptureOptions(
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          ),
+        );
+        await participant.publishAudioTrack(track);
+      }
+
       try {
         participant.setAttributes({
           'userId': widget.selectedUser.id,
@@ -146,6 +170,7 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
       } catch (_) {}
 
       _room = room;
+      _debugRoomState(room);
       _startLevelUpdates();
       setState(() {
         _active = true;
