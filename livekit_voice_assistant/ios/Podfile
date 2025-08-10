@@ -41,6 +41,6 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
     end
+    flutter_additional_ios_build_settings(target)
   end
-  flutter_additional_ios_build_settings(installer)
 end
