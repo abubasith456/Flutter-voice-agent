@@ -31,7 +31,7 @@ class VoiceAssistantApp extends StatelessWidget {
         if (settings.name == MainScreen.routeName) {
           final args = settings.arguments as SelectedUserArgs;
           return MaterialPageRoute(
-            builder: (_) => MainScreen(selectedUser: args.selectedUser, roomName: args.roomName),
+            builder: (_) => MainScreen(selectedUser: args.selectedUser),
           );
         }
         return null;

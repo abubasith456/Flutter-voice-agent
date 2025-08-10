@@ -5,9 +5,13 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 class LiveKitService {
   String generateToken({
-    required String userId,
-    required String userName,
-    String roomName = 'voice-assistant-room',
+    // Identity/name/room used by the token
+    required String tokenIdentity,
+    required String tokenName,
+    required String roomName,
+    // Stable metadata to attach to participant
+    required String metadataUserId,
+    required String metadataUserName,
     Duration ttl = const Duration(hours: 1),
   }) {
     final apiKey = dotenv.env['LIVEKIT_API_KEY'];
@@ -21,14 +25,14 @@ class LiveKitService {
 
     final claims = <String, dynamic>{
       'iss': apiKey,
-      'sub': userId,
-      'name': userName,
+      'sub': tokenIdentity,
+      'name': tokenName,
       'nbf': (now.millisecondsSinceEpoch / 1000).floor(),
       'exp': (exp.millisecondsSinceEpoch / 1000).floor(),
-      // Include participant metadata on join (JSON string)
+      // Stable participant metadata (JSON string)
       'metadata': jsonEncode({
-        'userId': userId,
-        'userName': userName,
+        'userId': metadataUserId,
+        'userName': metadataUserName,
       }),
       'video': {
         'roomCreate': true,

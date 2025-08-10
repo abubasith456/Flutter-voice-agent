@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
@@ -64,23 +66,39 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
     super.dispose();
   }
 
-  Future<void> _requestPermissions() async {
+  Future<void> _ensureMicrophonePermission() async {
+    if (kIsWeb) return; // Handled by browser prompt
     final status = await Permission.microphone.status;
-    if (!status.isGranted) {
-      final result = await Permission.microphone.request();
-      if (!result.isGranted) {
-        throw Exception('Microphone permission not granted');
-      }
+    if (status.isGranted) return;
+    if (status.isPermanentlyDenied) {
+      // Surface helpful action to open settings
+      throw Exception('Microphone permission permanently denied. Please enable it in Settings.');
     }
+    final result = await Permission.microphone.request();
+    if (!result.isGranted) {
+      throw Exception('Microphone permission not granted');
+    }
+  }
+
+  String _randomString(int len) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    final rand = Random.secure();
+    return Iterable.generate(len, (_) => chars[rand.nextInt(chars.length)]).join();
   }
 
   Future<String> _fetchToken() async {
     final svc = LiveKitService();
-    final roomName = dotenv.env['LIVEKIT_ROOM_NAME'] ?? 'voice-assistant-room';
+    final envRoom = dotenv.env['LIVEKIT_ROOM_NAME'] ?? 'voice-assistant-room';
+    // Randomized identity/name/room per connect
+    final tokenIdentity = 'user_${_randomString(6)}';
+    final tokenName = 'Guest ${_randomString(4)}';
+    final roomName = 'room_${_randomString(6)}';
     return svc.generateToken(
-      userId: widget.selectedUser.id,
-      userName: widget.selectedUser.name,
-      roomName: roomName,
+      tokenIdentity: tokenIdentity,
+      tokenName: tokenName,
+      roomName: roomName.isNotEmpty ? roomName : envRoom,
+      metadataUserId: widget.selectedUser.id,
+      metadataUserName: widget.selectedUser.name,
     );
   }
 
@@ -88,7 +106,7 @@ class _VoiceAssistantFABState extends State<VoiceAssistantFAB>
     if (_active || _connecting) return;
     setState(() => _connecting = true);
     try {
-      await _requestPermissions();
+      await _ensureMicrophonePermission();
       final url = dotenv.env['LIVEKIT_URL'];
       if (url == null || url.isEmpty) {
         throw Exception('LIVEKIT_URL not configured');

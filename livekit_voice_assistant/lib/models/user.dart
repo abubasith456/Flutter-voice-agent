@@ -7,6 +7,5 @@ class AppUser {
 
 class SelectedUserArgs {
   final AppUser selectedUser;
-  final String? roomName;
-  const SelectedUserArgs(this.selectedUser, {this.roomName});
+  const SelectedUserArgs(this.selectedUser);
 }
