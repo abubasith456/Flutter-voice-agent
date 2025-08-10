@@ -9,17 +9,20 @@ project 'Runner', {
 
 platform :ios, '13.0'
 
-# Locate FLUTTER_ROOT from Generated.xcconfig
+# Locate FLUTTER_ROOT from Generated.xcconfig (ios/Flutter/Generated.xcconfig)
 def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'))
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "Generated.xcconfig must exist. If you're running pod install manually, make sure `flutter pub get` is executed first."
+  generated_xcode_build_settings_path = File.expand_path(File.join(__dir__, 'Flutter', 'Generated.xcconfig'))
+  if File.exist?(generated_xcode_build_settings_path)
+    File.foreach(generated_xcode_build_settings_path) do |line|
+      matches = line.match(/FLUTTER_ROOT\=(.*)/)
+      return matches[1].strip if matches
+    end
   end
-  File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/FLUTTER_ROOT\=(.*)/)
-    return matches[1].strip if matches
+  # Fallback to environment variable if provided
+  if ENV['FLUTTER_ROOT'] && !ENV['FLUTTER_ROOT'].empty?
+    return ENV['FLUTTER_ROOT']
   end
-  raise "FLUTTER_ROOT not found in Generated.xcconfig"
+  raise "Generated.xcconfig must exist. Run `flutter pub get` in project root first (which creates ios/Flutter/Generated.xcconfig)."
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
