@@ -69,7 +69,3 @@ migrate_working_dir/
 # Build outputs
 **/build/
 **/.dart_tool/
-
-# Env files
-.env
-.env.*
