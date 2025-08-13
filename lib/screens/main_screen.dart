@@ -51,51 +51,35 @@ class _MainScreenState extends State<MainScreen>
                   ),
                   // --- Show OTP ---
                   if (widget.selectedUser.otp != "")
-                    Positioned(
-                      top: 32,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 320),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(12),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Use this OTP or Secret for test purpose: ${widget.selectedUser.otp}',
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Colors.amberAccent,
+                              fontWeight: FontWeight.bold,
+                              shadows: const [
+                                Shadow(blurRadius: 6, color: Colors.black87)
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Use this OTP or Secret for test purpose: ${widget.selectedUser.otp}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                  color: Colors.amberAccent,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(blurRadius: 6, color: Colors.black87)
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Please wait for the assistance to start, we are running on CPU so it may take some time to replay or start.',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                  color: Colors.white70,
-                                  fontStyle: FontStyle.italic,
-                                  shadows: const [
-                                    Shadow(blurRadius: 6, color: Colors.black87)
-                                  ],
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'Note: Please wait for the assistance to start, we are running on CPU so it may take some time to replay or start.',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white70,
+                              fontStyle: FontStyle.italic,
+                              shadows: const [
+                                Shadow(blurRadius: 6, color: Colors.black87)
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   const Spacer(),
@@ -125,19 +109,16 @@ class _MainScreenState extends State<MainScreen>
                                 ),
                               ],
                             )
-                          : Padding(
-                              padding: const EdgeInsets.only(bottom: 30),
-                              child: Text(
-                                'Tap the assistant to start',
-                                key: const ValueKey('hint'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                              ),
+                          : Text(
+                              'Tap the assistant to start',
+                              key: const ValueKey('hint'),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w300,
+                                  ),
                             ),
                     ),
                   ),
