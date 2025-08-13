@@ -2,8 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livekit_voice_assistant/plugin/livekit_theme.dart';
-import 'package:livekit_voice_assistant/plugin/livekit_voice_assistance.dart';
-import 'package:livekit_voice_assistant/services/livekit_service.dart';
 import '../models/user.dart';
 
 class MainScreen extends StatefulWidget {
@@ -51,6 +49,21 @@ class _MainScreenState extends State<MainScreen>
                       ],
                     ),
                   ),
+                  // --- Show OTP ---
+                  if (widget.selectedUser.otp != "")
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Use this OTP or Secret for test purpose: ${widget.selectedUser.otp}',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.amberAccent,
+                          fontWeight: FontWeight.bold,
+                          shadows: const [
+                            Shadow(blurRadius: 6, color: Colors.black87)
+                          ],
+                        ),
+                      ),
+                    ),
                   const Spacer(),
                   Center(
                     child: AnimatedSwitcher(

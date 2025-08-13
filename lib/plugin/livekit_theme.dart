@@ -222,6 +222,7 @@ class _LiveKitVoiceAssistantState extends State<LiveKitVoiceAssistant>
     if (!_isConnected && !_isConnecting) return;
 
     try {
+      await _room?.localParticipant?.setMicrophoneEnabled(false);
       _listener?.dispose();
       _listener = null;
       await _room?.disconnect();
